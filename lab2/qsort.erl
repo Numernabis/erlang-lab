@@ -11,13 +11,14 @@
 
 %% API
 -export([lessThan/2, grtEqThan/2, qs/1]).
--export([randomElems/3, compareSpeeds/3]).
+-export([randomElem/3, compareSpeeds/3]).
 
-lessThan(List, Arg) -> [].
-grtEqThan(List, Arg) -> [].
+lessThan(List, Arg) -> lists:filter(fun(X) -> X < Arg end, List).
+grtEqThan(List, Arg) -> lists:filter(fun(X) -> X >= Arg end, List).
 
+qs([]) -> [];
 qs([Pivot|Tail]) -> qs( lessThan(Tail,Pivot) ) ++ [Pivot] ++ qs( grtEqThan(Tail,Pivot) ).
 
 %% functions for testing qsort
-randomElems(N,Min,Max)-> [].
-compareSpeeds(List, Fun1, Fun2) -> [].
+randomElem(N, Min, Max) -> [rand:uniform(Max - Min + 1) + (Min - 1) || _ <- lists:seq(1, N)].
+compareSpeeds(List, Fun1, Fun2) -> []. %% TODO

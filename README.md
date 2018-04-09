@@ -8,3 +8,5 @@ Useful links:
 [Kurs języka Erlang](http://cahir.eisp.pl/doku.php?id=erlang)
 - [Typy danych](http://cahir.eisp.pl/doku.php?id=erlang:syntax)
 - [Funkcje](http://cahir.eisp.pl/doku.php?id=erlang:funs)
+
+---
