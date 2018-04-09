@@ -21,4 +21,10 @@ qs([Pivot|Tail]) -> qs( lessThan(Tail,Pivot) ) ++ [Pivot] ++ qs( grtEqThan(Tail,
 
 %% functions for testing qsort
 randomElem(N, Min, Max) -> [rand:uniform(Max - Min + 1) + (Min - 1) || _ <- lists:seq(1, N)].
-compareSpeeds(List, Fun1, Fun2) -> []. %% TODO
+compareSpeeds(List, Fun1, Fun2) ->
+  {Time1, _} = timer:tc(Fun1, [List]),
+  {Time2, _} = timer:tc(Fun2, [List]),
+  io:format("Time of Fun1: ~p~n", [Time1]),
+  io:format("Time of Fun2: ~p~n", [Time2]).
+
+%% qsort:compareSpeeds(qsort:randomElem(100000, 2, 1000), fun qsort:qs/1, fun lists:sort/1).
