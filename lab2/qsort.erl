@@ -11,13 +11,25 @@
 
 %% API
 -export([lessThan/2, grtEqThan/2, qs/1]).
+-export([partition/4, qs2/1]).
 -export([randomElem/3, compareSpeeds/3]).
 
-lessThan(List, Arg) -> lists:filter(fun(X) -> X < Arg end, List).
-grtEqThan(List, Arg) -> lists:filter(fun(X) -> X >= Arg end, List).
+lessThan(List, Arg) -> [X || X <- List, X < Arg].
+grtEqThan(List, Arg) -> [X || X <- List, X >= Arg].
+
+partition(_, [], L, G) -> {L, G};
+partition(Arg, [H|T], L, G) ->
+  if H < Arg -> partition(Arg, T, [H|L], G);
+     H >= Arg -> partition(Arg, T, L, [H|G])
+  end.
 
 qs([]) -> [];
 qs([Pivot|Tail]) -> qs( lessThan(Tail,Pivot) ) ++ [Pivot] ++ qs( grtEqThan(Tail,Pivot) ).
+
+qs2([]) -> [];
+qs2([Pivot|Tail]) ->
+  {L, G} = partition(Pivot, Tail, [], []),
+  qs2(L) ++ [Pivot] ++ qs(G).
 
 %% functions for testing qsort
 randomElem(N, Min, Max) -> [rand:uniform(Max - Min + 1) + (Min - 1) || _ <- lists:seq(1, N)].
