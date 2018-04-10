@@ -8,6 +8,8 @@
 %%%-------------------------------------------------------------------
 -module(pollution).
 -author("Ludwik Ciechański").
+-record(station, {name, geoCords, measure}).
+-record(measure, {temp, pm10, pm2d5, other=[]}).
 
 %% API
 -export([
@@ -20,4 +22,30 @@
   getDailyMean/3    %% zwraca średnią wartość parametru danego typu, danego dnia na wszystkich stacjach;
 ]).
 
-%% STRUKTURA DANYCH !
+createMonitor() -> #{}.
+addStation(Monitor, Name, GeoCords) ->
+  %% TODO: sprawdzić czy stacja już istnieje
+  maps:put(#station{name = Name, geoCords = GeoCords}, [], Monitor).
+
+addValue(Station, Date, Type, Value, Monitor) -> [].
+  %% TODO: pobrać pomiary dla danej stacji (sprawdzić czy istnieje)
+  %% TODO: sprawdzić czy taki pomiar {Type, Value} już istnieje
+  %% TODO: dodać pomiar
+
+removeValue(Station, Date, Type, Monitor) -> [].
+  %% TODO: analogicznie jak addValue
+  %% TODO: usunąć pomiar
+
+getOneValue(Station, Date, Type, Monitor) -> [].
+  %% TODO: sprawdzić czy istnieje taka stacja
+  %% TODO: sprawdzić czy istnieje pomiar {Date, Type}
+  %% TODO: zwrócić wartość pomiaru
+
+getStationMean(Station, Type, Monitor) -> [].
+  %% TODO: sprawdzić czy istnieje taka stacja
+  %% TODO: sprawdzić czy istnieje pomiar zadanego typu
+  %% TODO: obliczyć i zwrócić średnią wartość pomiaru
+
+getDailyMean(Type, Date, Monitor) -> [].
+  %% TODO: pobrać wszystkie pomiary danego typu z danego dnia
+  %% TODO: obliczyć i zwrócić średnią wartość pomiaru
