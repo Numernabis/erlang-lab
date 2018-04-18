@@ -8,44 +8,70 @@
 %%%-------------------------------------------------------------------
 -module(pollution).
 -author("Ludwik Ciechański").
--record(station, {name, geoCords, measure}).
--record(measure, {temp, pm10, pm2d5, other=[]}).
+-record(monitor, {byName, byCords, stations, n = 0}).
+-record(station, {id, name, cords, measures}).
+-record(measure, {date, type, value}).
 
-%% API
 -export([
-  createMonitor/0,  %% tworzy i zwraca nowy monitor zanieczyszczeń;
-  addStation/3,     %% dodaje do monitora wpis o nowej stacji pomiarowej (nazwa i współrzędne geograficzne), zwraca zaktualizowany monitor;
-  addValue/5,       %% dodaje odczyt ze stacji (współrzędne geograficzne lub nazwa stacji, data, typ pomiaru, wartość), zwraca zaktualizowany monitor;
-  removeValue/4,    %% usuwa odczyt ze stacji (współrzędne geograficzne lub nazwa stacji, data, typ pomiaru), zwraca zaktualizowany monitor;
-  getOneValue/4,    %% zwraca wartość pomiaru o zadanym typie, z zadanej daty i stacji;
-  getStationMean/3, %% zwraca średnią wartość parametru danego typu z zadanej stacji;
-  getDailyMean/3    %% zwraca średnią wartość parametru danego typu, danego dnia na wszystkich stacjach;
+  createMonitor/0, addStation/3, addValue/5, removeValue/4,
+  getOneValue/4, getStationMean/3, getDailyMean/3
 ]).
+%%%-------------------------------------------------------------------
 
-createMonitor() -> #{}.
-addStation(Monitor, Name, GeoCords) ->
-  %% TODO: sprawdzić czy stacja już istnieje
-  maps:put(#station{name = Name, geoCords = GeoCords}, [], Monitor).
+createMonitor() -> #monitor{byName = #{}, byCords = #{}, stations = #{}}.
+%%%-------------------------------------------------------------------
 
-addValue(Station, Date, Type, Value, Monitor) -> [].
-  %% TODO: pobrać pomiary dla danej stacji (sprawdzić czy istnieje)
-  %% TODO: sprawdzić czy taki pomiar {Type, Value} już istnieje
-  %% TODO: dodać pomiar
+addStation(Name, Cords, Monitor) ->
+  N = maps:is_key(Name, Monitor#monitor.byName),
+  C = maps:is_key(Cords, Monitor#monitor.byCords),
+  addStation(not N and not C, Name, Cords, Monitor).
 
-removeValue(Station, Date, Type, Monitor) -> [].
-  %% TODO: analogicznie jak addValue
-  %% TODO: usunąć pomiar
+addStation(true, Name, Cords, Monitor) ->
+  Sid = Monitor#monitor.n,
+  NewStation = #station{id = Sid, name = Name, cords = Cords, measures = []},
+  Monitor#monitor{
+    byName = maps:put(Name, Sid, Monitor#monitor.byName),
+    byCords = maps:put(Cords, Sid, Monitor#monitor.byCords),
+    stations = maps:put(Sid, NewStation, Monitor#monitor.stations),
+    n = Sid + 1
+  };
+addStation(false, _, _, _) -> {error, "Station already exists!"}.
+%%%-------------------------------------------------------------------
 
-getOneValue(Station, Date, Type, Monitor) -> [].
-  %% TODO: sprawdzić czy istnieje taka stacja
-  %% TODO: sprawdzić czy istnieje pomiar {Date, Type}
-  %% TODO: zwrócić wartość pomiaru
+addValue(Station, Date, Type, Value, Monitor) ->
+  StationToUpdate = getStation(Station, Monitor),
+  N = getMeasure(StationToUpdate, Date, Type),
+  addValue(N, StationToUpdate, Date, Type, Value, Monitor).
 
-getStationMean(Station, Type, Monitor) -> [].
-  %% TODO: sprawdzić czy istnieje taka stacja
-  %% TODO: sprawdzić czy istnieje pomiar zadanego typu
-  %% TODO: obliczyć i zwrócić średnią wartość pomiaru
+addValue([], Station, Date, Type, Value, Monitor) ->
+  Sid = getSid(Station, Monitor),
+  NewMeasure = #measure{date = Date, type = Type, value = Value},
+  OldMeasures = Station#station.measures,
+  UpdatedStation = Station#station{
+    measures = [NewMeasure] ++ OldMeasures
+  },
+  Monitor#monitor{
+    stations = maps:put(Sid, UpdatedStation, Monitor#monitor.stations)
+  };
+addValue(_, _, _, _, _, _) -> {error, "Such measure already exists!"}.
+%%%-------------------------------------------------------------------
 
-getDailyMean(Type, Date, Monitor) -> [].
-  %% TODO: pobrać wszystkie pomiary danego typu z danego dnia
-  %% TODO: obliczyć i zwrócić średnią wartość pomiaru
+removeValue(Station, Date, Type, Monitor) -> []. %% TODO
+
+getOneValue(Station, Date, Type, Monitor) -> []. %% TODO
+
+getStationMean(Station, Type, Monitor) -> []. %% TODO
+
+getDailyMean(Type, Date, Monitor) -> []. %% TODO
+%%%-------------------------------------------------------------------
+
+getSid({_, _} = Key, Monitor) -> maps:get(Key, Monitor#monitor.byCords);
+getSid(_ = Key, Monitor) -> maps:get(Key, Monitor#monitor.byName).
+
+getStation(Key, Monitor) -> maps:get(getSid(Key, Monitor), Monitor#monitor.stations).
+
+checkTimeAndType(Measure, Date, Type) ->
+  (Measure#measure.date =:= Date) and (Measure#measure.type =:= Type).
+
+getMeasure(Station, Date, Type) ->
+  [M || M <- Station#station.measures, checkTimeAndType(M, Date, Type)].
