@@ -27,7 +27,31 @@ init() ->
 
 loop(Monitor) ->
   receive
-    {} -> [];
+    {addStation, {Name, Cords}} ->
+      Updated = pollution:addStation(Name, Cords, Monitor),
+      loop(Updated);
+    {addValue, {Station, Date, Type, Value}} ->
+      Updated = pollution:addValue(Station, Date, Type, Value, Monitor),
+      loop(Updated);
+    {removeValue, {Station, Date, Type}} ->
+      Updated = pollution:removeValue(Station, Date, Type, Monitor),
+      loop(Updated);
+    %%% ...
     stop -> ok
   end.
+%%%-------------------------------------------------------------------
+
+addStation(Name, Cords) -> server ! {addStation, {Name, Cords}}.
+
+addValue(Station, Date, Type, Value) -> server ! {addValue, {Station, Date, Type, Value}}.
+
+removeValue(Station, Date, Type) -> server ! {removeValue, {Station, Date, Type}}.
+
+getOneValue(Station, Date, Type) -> [].
+
+getStationMean(Station, Type) -> [].
+
+getDailyMean(Type, Day) -> [].
+
+getMinimumDistanceStations() -> [].
 %%%-------------------------------------------------------------------
