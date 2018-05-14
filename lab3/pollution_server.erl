@@ -36,7 +36,26 @@ loop(Monitor) ->
     {removeValue, {Station, Date, Type}} ->
       Updated = pollution:removeValue(Station, Date, Type, Monitor),
       loop(Updated);
-    %%% ...
+    {getOneValue, {Station, Date, Type}} ->
+      OneValue = pollution:getOneValue(Station, Date, Type, Monitor),
+      io:format("server response:
+        getOneValue(~w, ~w, ~w) = ~w~n", [Station, Date, Type, OneValue]),
+      loop(Monitor);
+    {getStationMean, {Station, Type}} ->
+      StationMean = pollution:getStationMean(Station, Type, Monitor),
+      io:format("server response:
+        getStationMean(~w, ~w) = ~w~n", [Station, Type, StationMean]),
+      loop(Monitor);
+    {getDailyMean, {Station, Type}} ->
+      DailyMean = pollution:getDailyMean(Station, Type, Monitor),
+      io:format("server response:
+        getDailyMean(~w, ~w) = ~w~n", [Station, Type, DailyMean]),
+      loop(Monitor);
+    {getMinimumDistanceStations} ->
+      MinDistStations = pollution:getMinimumDistanceStations(Monitor),
+      io:format("server response:
+        getMinimumDistanceStations() = ~w~n", [MinDistStations]),
+      loop(Monitor);
     stop -> ok
   end.
 %%%-------------------------------------------------------------------
@@ -47,11 +66,11 @@ addValue(Station, Date, Type, Value) -> server ! {addValue, {Station, Date, Type
 
 removeValue(Station, Date, Type) -> server ! {removeValue, {Station, Date, Type}}.
 
-getOneValue(Station, Date, Type) -> [].
+getOneValue(Station, Date, Type) -> server ! {getOneValue, {Station, Date, Type}}.
 
-getStationMean(Station, Type) -> [].
+getStationMean(Station, Type) -> server ! {getStationMean, {Station, Type}}.
 
-getDailyMean(Type, Day) -> [].
+getDailyMean(Type, Day) -> server ! {getDailyMean, {Type, Day}}.
 
-getMinimumDistanceStations() -> [].
+getMinimumDistanceStations() -> server ! {getMinimumDistanceStations}.
 %%%-------------------------------------------------------------------
