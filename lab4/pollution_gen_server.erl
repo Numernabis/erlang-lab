@@ -84,8 +84,8 @@ handle_call({getMinimumDistanceStations}, _From, State) ->
   {reply, {MinDistStation}, State}.
 %%%-------------------------------------------------------------------
 
-terminate(Reason, Value) ->
-  io:format("server: exit ~p ~n", [Value]),
+terminate(Reason, _Value) ->
+  io:format("gen_server: terminate ~n"),
   Reason.
 
 crash() -> gen_server:cast(pgs, crash).

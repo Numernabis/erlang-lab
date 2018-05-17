@@ -21,7 +21,7 @@ init() ->
 loop() ->
   pollution_server:start(),
   receive
-    {'EXIT', P, R} -> loop();
+    {'EXIT', _P, _R} -> loop();
     stop -> ok
   end.
 %%%-------------------------------------------------------------------
