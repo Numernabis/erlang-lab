@@ -12,13 +12,15 @@
 -export([
   start/0, stop/0, addStation/2, addValue/4, removeValue/3,
   getOneValue/3, getStationMean/2, getDailyMean/2,
-  getMinimumDistanceStations/0
+  getMinimumDistanceStations/0, crash/0
 ]).
 %%%-------------------------------------------------------------------
 
-start() -> register(server, spawn(fun() -> init() end)).
+start() -> register(server, spawn_link(fun() -> init() end)).
 
 stop() -> server ! stop.
+
+crash() -> server ! crash.
 
 init() ->
   Monitor = pollution:createMonitor(),
@@ -56,6 +58,7 @@ loop(Monitor) ->
       io:format("server response:
         getMinimumDistanceStations() = ~w~n", [MinDistStations]),
       loop(Monitor);
+    crash -> 44 / 0;
     stop -> ok
   end.
 %%%-------------------------------------------------------------------
